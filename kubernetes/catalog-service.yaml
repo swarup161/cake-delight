@@ -18,6 +18,21 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8081
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://host.docker.internal:3306/cake_catalog"
+
+            - name: root
+              valueFrom:
+                secretKeyRef:
+                  name: database-credentials
+                  key: username
+
+            - name: root
+              valueFrom:
+                secretKeyRef:
+                  name: database-credentials
+                  key: password
 
 ---
 
