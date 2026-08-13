@@ -1,0 +1,46 @@
+# Maven
+**/target/
+**/.mvn/
+
+# Java
+*.class
+
+# IDE
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Credentials and secrets
+secrets/
+credentials/
+**/application-local.properties
+**/application-local.yml
+
+# Temporary files
+*.tmp
+*.temp
+
+# Node
+node_modules/
+
+# Build artifacts
+*.jar
+*.war

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: localhost:5000/cake-delight-notification-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8084
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://host.docker.internal:3306/cake_notification_db"
+
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "root"
+
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbitmq"
+
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+
+            - name: SPRING_RABBITMQ_USERNAME
+              value: "guest"
+
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: "guest"
+
+            - name: SPRING_MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: notification-email
+                  key: username
+
+            - name: SPRING_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: notification-email
+                  key: password
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+spec:
+  selector:
+    app: notification-service
+  ports:
+    - port: 8084
+      targetPort: 8084
+  type: ClusterIP

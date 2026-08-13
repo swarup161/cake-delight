@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: order-service
+          image: localhost:5000/cake-delight-order-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+          env:
+            # MySQL running on Windows host
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://host.docker.internal:3306/cake_order"
+
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "root"
+
+            # RabbitMQ running in Kubernetes
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbitmq"
+
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+
+            - name: SPRING_RABBITMQ_USERNAME
+              value: "guest"
+
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: "guest"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  selector:
+    app: order-service
+  ports:
+    - port: 8082
+      targetPort: 8082
+  type: ClusterIP
