@@ -1,49 +1,62 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: rating-service
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: rating-service
-  template:
-    metadata:
-      labels:
-        app: rating-service
-    spec:
-      containers:
-        - name: rating-service
-          image: localhost:5000/cake-delight-rating-service:latest
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 8083
-          env:
-            - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://host.docker.internal:3306/cake_delight_rating"
+# 🍰 Cake Delight
 
-            - name: root
-              valueFrom:
-                secretKeyRef:
-                  name: database-credentials
-                  key: username
+A cloud-native cake ordering application built using **Spring Boot Microservices, Docker, Kubernetes, MySQL, RabbitMQ, and a JavaScript frontend**.
 
-            - name: root
-              valueFrom:
-                secretKeyRef:
-                  name: database-credentials
-                  key: password
+The application demonstrates an end-to-end cake ordering workflow including cake browsing, filtering, basket management, checkout, ratings, and event-driven order notifications.
 
 ---
 
-apiVersion: v1
-kind: Service
-metadata:
-  name: rating-service
-spec:
-  selector:
-    app: rating-service
-  ports:
-    - port: 8083
-      targetPort: 8083
-  type: ClusterIP
+## 📌 Project Overview
+
+Cake Delight follows a microservices architecture where business responsibilities are separated into independently deployable services.
+
+### Microservices
+
+| Service | Port | Responsibility |
+|---|---:|---|
+| API Gateway | 8080 | Entry point for frontend API requests |
+| Catalog Service | 8081 | Cake catalog, details and filtering |
+| Order Service | 8082 | Basket, checkout and order management |
+| Rating Service | 8083 | Cake ratings and average ratings |
+| Notification Service | 8084 | Order-completion notifications |
+| RabbitMQ | 5672 | Event/message broker |
+
+---
+
+## 🏗️ Architecture
+
+```text
+                    ┌─────────────────┐
+                    │    Frontend     │
+                    │ HTML/CSS/JS     │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │   API Gateway   │
+                    │     :8080       │
+                    └───────┬─────────┘
+                            │
+             ┌──────────────┼──────────────┐
+             ▼              ▼              ▼
+      ┌────────────┐ ┌────────────┐ ┌────────────┐
+      │  Catalog   │ │   Order    │ │  Rating    │
+      │   :8081    │ │   :8082    │ │   :8083    │
+      └─────┬──────┘ └─────┬──────┘ └─────┬──────┘
+            │              │              │
+            ▼              │              ▼
+         MySQL             │            MySQL
+                           │
+                           ▼
+                     ┌───────────┐
+                     │ RabbitMQ  │
+                     └─────┬─────┘
+                           │
+                           ▼
+                   ┌────────────────┐
+                   │ Notification   │
+                   │ Service :8084  │
+                   └───────┬────────┘
+                           │
+                           ▼
+                         Email
